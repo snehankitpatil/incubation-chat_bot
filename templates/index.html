@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Incubation Portal Chatbot</title>
+    <script>
+    async function askBot() {
+        const btn = document.getElementById("askBtn");
+        btn.disabled = true;
+
+        const question = document.getElementById("question").value;
+
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+        });
+
+        const data = await response.json();
+        document.getElementById("answer").innerText = data.answer;
+
+        btn.disabled = false;
+    }
+    </script>
+
+</head>
+<body>
+    <h2>Incubation Portal Consultation Chatbot</h2>
+
+    <textarea id="question" rows="4" cols="50"
+        placeholder="Type your question..."></textarea><br><br>
+
+     <button id="askBtn" onclick="askBot()">Ask</button>
+
+    <h3>Answer:</h3>
+    <p id="answer"></p>
+</body>
+</html>
