@@ -1,37 +1,410 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <title>Incubation Portal Chatbot</title>
+  <head>
+    <title>Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      body {
+        background-color: rgb(150, 40, 40);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+      }
+
+      #glassBot {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-family: Arial, sans-serif;
+        z-index: 99999;
+      }
+
+      #glassBot-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 22px;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      #glassBot-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ff3b3b;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulseBadge 1.8s infinite;
+      }
+
+      @keyframes pulseBadge {
+        50% {
+          transform: scale(1.15);
+        }
+      }
+
+      #glassBot-box {
+        display: none;
+        width: 360px;
+        height: 470px;
+        border-radius: 18px;
+        background: rgba(20, 20, 20, 0.55);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        margin-bottom: 12px;
+        color: white;
+      }
+
+      #glassBot-head {
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.35);
+        cursor: grab;
+        user-select: none;
+      }
+      #glassBot-head:active {
+        cursor: grabbing;
+      }
+
+      #glassBot-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      }
+
+      .glassBot-tab {
+        flex: 1;
+        padding: 10px;
+        cursor: pointer;
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+
+      .glassBot-active {
+        background: rgba(255, 255, 255, 0.13);
+        border-bottom: 2px solid rgba(13, 110, 253, 0.9);
+        opacity: 1;
+      }
+
+      #glassBot-faq,
+      #glassBot-chat {
+        height: 320px;
+        overflow-y: auto;
+        padding: 12px;
+      }
+
+      .glassBot-faq-item {
+        padding: 11px 12px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .glassBot-msg {
+        padding: 10px;
+        border-radius: 14px;
+        margin: 8px 0;
+        width: fit-content;
+        max-width: 78%;
+        font-size: 14px;
+        animation: pop 0.15s ease-in;
+        word-wrap: break-word;
+      }
+
+      @keyframes pop {
+        from {
+          transform: scale(0.95);
+          opacity: 0.6;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .glassBot-user {
+        margin-left: auto;
+        background: rgba(13, 110, 253, 0.75);
+      }
+      .glassBot-bot {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      #glassBot-typing {
+        padding: 6px 12px;
+        font-size: 12px;
+        opacity: 0.8;
+        display: none;
+      }
+
+      #glassBot-input {
+        display: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      #glassBot-input input {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: white;
+      }
+
+      #glassBot-input button {
+        border: none;
+        padding: 0 14px;
+        cursor: pointer;
+        background: rgba(13, 110, 253, 0.85);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="glassBot">
+      <div id="glassBot-box">
+        <div id="glassBot-head">
+          <b>RPF Support Assistant</b>
+          <div style="display: flex; gap: 12px">
+            <span id="glassBot-clear">🗑</span>
+            <span id="glassBot-close">✖</span>
+          </div>
+        </div>
+
+        <div id="glassBot-tabs">
+          <div class="glassBot-tab glassBot-active" id="glassTabFAQ">FAQ</div>
+          <div class="glassBot-tab" id="glassTabCHAT">Chat</div>
+        </div>
+
+        <div id="glassBot-faq">
+          <div class="glassBot-faq-item">📌 What is SPPU Research Park Foundation (SPPU-RPF)?</div>
+          <div class="glassBot-faq-item">🕒 What is Startup Incubation Facility?</div>
+          <div class="glassBot-faq-item">📞 What is Consultancy Services?</div>
+          <div class="glassBot-faq-item">💳 What is Co-location?</div>
+          <div class="glassBot-faq-item">➖ What is Building Incubation Pipeline? </div>
+          <div class="glassBot-faq-item">📦 What are Research Collaborations?</div>
+        </div>
+
+        <div id="glassBot-chat" style="display: none"></div>
+        <div id="glassBot-typing">Bot is typing...</div>
+
+        <div id="glassBot-input">
+          <input id="glassBot-text" placeholder="Type your message..." />
+          <button id="glassBot-send">➤</button>
+        </div>
+      </div>
+
+      <button id="glassBot-btn">💬</button>
+    </div>
+
     <script>
-    async function askBot() {
-        const btn = document.getElementById("askBtn");
-        btn.disabled = true;
+      const btn = document.getElementById("glassBot-btn");
+      const box = document.getElementById("glassBot-box");
+      const closeBtn = document.getElementById("glassBot-close");
+      const clearBtn = document.getElementById("glassBot-clear");
 
-        const question = document.getElementById("question").value;
+      const tabFAQ = document.getElementById("glassTabFAQ");
+      const tabCHAT = document.getElementById("glassTabCHAT");
 
-        const response = await fetch("/ask", {
+      const faqSection = document.getElementById("glassBot-faq");
+      const chatSection = document.getElementById("glassBot-chat");
+
+      const inputWrap = document.getElementById("glassBot-input");
+      const inputText = document.getElementById("glassBot-text");
+      const sendBtn = document.getElementById("glassBot-send");
+      const typing = document.getElementById("glassBot-typing");
+
+      let questionCount = 0;
+      const FORM_TRIGGER_COUNT = 3;
+      const USER_PROFILE_KEY = "chat_user_profile";
+      const CHAT_HISTORY_KEY = "chat_history_data";
+      let greeted = false;
+
+      function getChatHistory() {
+        return JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY)) || [];
+      }
+      function saveChatHistory(h) {
+        localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(h));
+      }
+
+      function addMsg(text, type = "bot", store = true) {
+        const div = document.createElement("div");
+        div.className =
+          "glassBot-msg " +
+          (type === "user" ? "glassBot-user" : "glassBot-bot");
+        div.textContent = text;
+        chatSection.appendChild(div);
+        chatSection.scrollTop = chatSection.scrollHeight;
+        if (store) {
+          const h = getChatHistory();
+          h.push({ type, text, time: new Date().toISOString() });
+          saveChatHistory(h);
+        }
+      }
+
+      function loadChatHistory() {
+        chatSection.innerHTML = "";
+        getChatHistory().forEach((m) => addMsg(m.text, m.type, false));
+      }
+
+      /* ✅ MERGED BACKEND CALL */
+      async function sendToBackend(message) {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question })
-        });
+            body: JSON.stringify({ question: message }),
+          });
+          const data = await response.json();
+          return data.answer || "🤖 I couldn't find an answer to that.";
+        } catch {
+          return "❌ Server error. Please try again.";
+        }
+      }
 
-        const data = await response.json();
-        document.getElementById("answer").innerText = data.answer;
+      function openFAQ() {
+        tabFAQ.classList.add("glassBot-active");
+        tabCHAT.classList.remove("glassBot-active");
+        faqSection.style.display = "block";
+        chatSection.style.display = "none";
+        inputWrap.style.display = "none";
+      }
 
-        btn.disabled = false;
-    }
+      function openChat() {
+        tabCHAT.classList.add("glassBot-active");
+        tabFAQ.classList.remove("glassBot-active");
+        faqSection.style.display = "none";
+        chatSection.style.display = "block";
+        inputWrap.style.display = "flex";
+        loadChatHistory();
+        if (!greeted && getChatHistory().length === 0) {
+          addMsg("👋 Hello! Ask me anything or select from FAQ.");
+          greeted = true;
+        }
+      }
+
+      async function handleSend(text) {
+        if (!text.trim()) return;
+        openChat();
+        addMsg(text, "user");
+        inputText.value = "";
+        questionCount++;
+        typing.style.display = "block";
+        const reply = await sendToBackend(text);
+        typing.style.display = "none";
+        addMsg(reply, "bot");
+      }
+
+      function clearChat() {
+        localStorage.removeItem(CHAT_HISTORY_KEY);
+        chatSection.innerHTML = "";
+        questionCount = 0;
+        greeted = false;
+        addMsg("🗑 Chat cleared! 👋 Hello! Ask me anything.", "bot");
+      }
+
+      btn.onclick = () => {
+        box.style.display = box.style.display === "block" ? "none" : "block";
+        openFAQ();
+      };
+      closeBtn.onclick = () => (box.style.display = "none");
+      clearBtn.onclick = clearChat;
+      tabFAQ.onclick = openFAQ;
+      tabCHAT.onclick = openChat;
+      document
+        .querySelectorAll(".glassBot-faq-item")
+        .forEach((i) => (i.onclick = () => handleSend(i.textContent)));
+      sendBtn.onclick = () => handleSend(inputText.value);
+      inputText.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSend(inputText.value);
+      });
+
+
+      /* ================= DRAG CHATBOT LEFT-RIGHT ================= */
+
+      const botWrapper = document.getElementById("glassBot");
+      const botHeader = document.getElementById("glassBot-head");
+
+      let isDragging = false;
+      let startX;
+      let startLeft;
+
+      botHeader.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startLeft = botWrapper.offsetLeft;
+        document.body.style.userSelect = "none";
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        const dx = e.clientX - startX;
+        let newLeft = startLeft + dx;
+
+        const maxLeft = window.innerWidth - botWrapper.offsetWidth - 10;
+        if (newLeft < 10) newLeft = 10;
+        if (newLeft > maxLeft) newLeft = maxLeft;
+
+        botWrapper.style.left = newLeft + "px";
+        botWrapper.style.right = "auto";
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        document.body.style.userSelect = "auto";
+      });
+
+      /* Touch support for mobile */
+      botHeader.addEventListener("touchstart", (e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startLeft = botWrapper.offsetLeft;
+      });
+
+      document.addEventListener("touchmove", (e) => {
+        if (!isDragging) return;
+
+        const dx = e.touches[0].clientX - startX;
+        let newLeft = startLeft + dx;
+
+        const maxLeft = window.innerWidth - botWrapper.offsetWidth - 10;
+        if (newLeft < 10) newLeft = 10;
+        if (newLeft > maxLeft) newLeft = maxLeft;
+
+        botWrapper.style.left = newLeft + "px";
+        botWrapper.style.right = "auto";
+      });
+
+      document.addEventListener("touchend", () => {
+        isDragging = false;
+      });
     </script>
-
-</head>
-<body>
-    <h2>Incubation Portal Consultation Chatbot</h2>
-
-    <textarea id="question" rows="4" cols="50"
-        placeholder="Type your question..."></textarea><br><br>
-
-     <button id="askBtn" onclick="askBot()">Ask</button>
-
-    <h3>Answer:</h3>
-    <p id="answer"></p>
-</body>
+  </body>
 </html>
