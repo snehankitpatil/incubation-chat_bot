@@ -1,0 +1,5 @@
+db
+google.genai
+flask
+pymongo
+dotenv
