@@ -1,390 +1,642 @@
-<!doctype html>
+<!-- Main Chatbiot UI -->
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Chatbot</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <style>
-      body {
-        background-color: rgb(150, 40, 40);
-        margin: 0;
-        padding: 0;
-        height: 100vh;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPPU Assistant - Ask RPF</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #3A8DAD;
+      --primary-dark: #1F5F73;
+      --accent: #5CA4C4;
+      --light-bg: #EAF4F8;
+      --white: #ffffff;
+      --border: #D4E6EE;
+      --text-dark: #12343B;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #000000;
+      margin: 0;
+    }
+
+    /* ================= LAUNCHER ================= */
+    #chat-launcher {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(31, 95, 115, 0.4);
+      z-index: 10000;
+    }
+
+    /* ================= CHAT BOX ================= */
+    #chat-box {
+      position: fixed;
+      bottom: 95px;
+      right: 25px;
+      width: 370px;
+      height: 475px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    #chat-badge {
+      position: fixed;
+      display: flex;
+      bottom: 95px;
+      right: 44px;
+      width: 191px;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
+      color: var(--text-dark);
+      max-width: 226px;
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    #close-badge {
+      position: fixed;
+      display: flex;
+      bottom: 95px;
+      right: 20px;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      /* box-shadow: 0 6px 20px rgba(0, 0, 0, .15); */
+      color: var(--text-dark);
+      max-width: 220px;
+      cursor: pointer;
+      z-index: 1000;
+      width: 19px;
+    }
+
+    @media (max-width: 600px) {
+      #chat-box {
+        width: 65%;
+        height: 60%;
+        bottom: 92px;
+        right: 19px;
+        border-radius: 100;
+      }
+    }
+
+
+    /* ================= HEADER ================= */
+    #chat-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #chat-header button {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* ================= BODY ================= */
+    #chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: var(--light-bg);
+    }
+
+    .message {
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    .bot {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: var(--text-dark);
+    }
+
+    .user {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .user span {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 18px 18px 4px 18px;
+    }
+
+    /* ================= FAQ ================= */
+    .faq {
+      margin-top: 12px;
+    }
+
+    .faq button {
+      width: 100%;
+      padding: 8px 12px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .faq button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* ================= TYPING ================= */
+    .typing span {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+      display: inline-block;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0)
       }
 
-      #glassBot {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        font-family: Arial, sans-serif;
-        z-index: 99999;
+      40% {
+        transform: scale(1)
+      }
+    }
+
+    /* ================= INPUT ================= */
+    #chat-input {
+      border-top: 1px solid var(--border);
+      padding: 12px;
+      display: flex;
+      background: #fff;
+    }
+
+    #chat-input input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    #chat-input button {
+      margin-left: 8px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* ================= MODAL ================= */
+    #clear-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 18px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background: #ddd;
+    }
+
+    .confirm-clear {
+      background: var(--primary);
+      color: #fff;
+    }
+
+
+    /* ================= FEEDBACK ANIMATION ================= */
+    .feedback i {
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    /* Hover bounce */
+    .feedback i:hover {
+      transform: scale(1.25) rotate(-5deg);
+    }
+
+    /* Click animation */
+    .feedback i.clicked {
+      animation: pop 0.35s ease forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(1);
       }
 
-      #glassBot-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        font-size: 22px;
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
+      50% {
+        transform: scale(1.4);
       }
 
-      #glassBot-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: #ff3b3b;
-        color: white;
-        font-size: 11px;
-        font-weight: bold;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        border-radius: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: pulseBadge 1.8s infinite;
+      100% {
+        transform: scale(1.1);
       }
+    }
 
-      @keyframes pulseBadge {
-        50% {
-          transform: scale(1.15);
-        }
-      }
+    #chat-icon {
+      display: flex;
+      position: fixed;
+      width: 25px;
+      right: 275px;
+      bottom: 528px;
+    }
 
-      #glassBot-box {
-        display: none;
-        width: 360px;
-        height: 470px;
-        border-radius: 18px;
-        background: rgba(20, 20, 20, 0.55);
-        backdrop-filter: blur(16px);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
-        overflow: hidden;
-        margin-bottom: 12px;
-        color: white;
-      }
+    .aws-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
 
-      #glassBot-head {
-        padding: 12px 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: rgba(0, 0, 0, 0.35);
-        cursor: grab;
-        user-select: none;
-      }
-      #glassBot-head:active {
-        cursor: grabbing;
-      }
+    .aws-section {
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 6px;
+    }
 
-      #glassBot-tabs {
-        display: flex;
-        background: rgba(255, 255, 255, 0.08);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-      }
+    .aws-bullet {
+      margin-left: 10px;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+  </style>
 
-      .glassBot-tab {
-        flex: 1;
-        padding: 10px;
-        cursor: pointer;
-        text-align: center;
-        font-weight: bold;
-        font-size: 13px;
-        opacity: 0.8;
-      }
+</head>
 
-      .glassBot-active {
-        background: rgba(255, 255, 255, 0.13);
-        border-bottom: 2px solid rgba(13, 110, 253, 0.9);
-        opacity: 1;
-      }
+<body>
 
-      #glassBot-faq,
-      #glassBot-chat {
-        height: 320px;
-        overflow-y: auto;
-        padding: 12px;
-      }
+  <div id="chat-launcher">💬</div>
 
-      .glassBot-faq-item {
-        padding: 11px 12px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.09);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
+  <div id="chat-badge">
+    Hi there! Need help with RPF?
+  </div>
+  <div id="close-badge">❌</div>
 
-      .glassBot-msg {
-        padding: 10px;
-        border-radius: 14px;
-        margin: 8px 0;
-        width: fit-content;
-        max-width: 78%;
-        font-size: 14px;
-        animation: pop 0.15s ease-in;
-        word-wrap: break-word;
-      }
-
-      @keyframes pop {
-        from {
-          transform: scale(0.95);
-          opacity: 0.6;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-
-      .glassBot-user {
-        margin-left: auto;
-        background: rgba(13, 110, 253, 0.75);
-      }
-      .glassBot-bot {
-        background: rgba(255, 255, 255, 0.14);
-      }
-
-      #glassBot-typing {
-        padding: 6px 12px;
-        font-size: 12px;
-        opacity: 0.8;
-        display: none;
-      }
-
-      #glassBot-input {
-        display: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(0, 0, 0, 0.2);
-      }
-
-      #glassBot-input input {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        outline: none;
-        background: transparent;
-        color: white;
-      }
-
-      #glassBot-input button {
-        border: none;
-        padding: 0 14px;
-        cursor: pointer;
-        background: rgba(13, 110, 253, 0.85);
-        color: white;
-      }
-      .aws-title {
-        font-weight: bold;
-        font-size: 17px;
-        margin-bottom: 8px;
-      }
-
-      .aws-section {
-        font-weight: bold;
-        margin-top: 12px;
-        margin-bottom: 6px;
-      }
-
-      .aws-bullet {
-        margin-left: 8px;
-        margin-bottom: 10px;
-        line-height: 1.6;
-      }
-      .glassBot-bot a {
-        color: #4da6ff;
-        text-decoration: none;
-        font-weight: 600;
-      }
-
-      .glassBot-bot a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="glassBot">
-      <div id="glassBot-box">
-        <div id="glassBot-head">
-          <b>RPF Support Assistant</b>
-          <div style="display: flex; gap: 12px">
-            <span id="glassBot-clear">🗑</span>
-            <span id="glassBot-close">✖</span>
-          </div>
-        </div>
-
-        <div id="glassBot-tabs">
-          <div class="glassBot-tab glassBot-active" id="glassTabFAQ">FAQ</div>
-          <div class="glassBot-tab" id="glassTabCHAT">Chat</div>
-        </div>
-
-        <div id="glassBot-faq">
-          <div class="glassBot-faq-item">📌 What is SPPU Research Park Foundation (SPPU-RPF)?</div>
-          <div class="glassBot-faq-item">🕒 What is Startup Incubation Facility?</div>
-          <div class="glassBot-faq-item">📞 What is Consultancy Services?</div>
-          <div class="glassBot-faq-item">💳 What is Co-location?</div>
-          <div class="glassBot-faq-item">➖ What is Building Incubation Pipeline? </div>
-          <div class="glassBot-faq-item">📦 What are Research Collaborations?</div>
-        </div>
-
-        <div id="glassBot-chat" style="display: none"></div>
-        <div id="glassBot-typing">Bot is typing...</div>
-
-        <div id="glassBot-input">
-          <input id="glassBot-text" placeholder="Type your message..." />
-          <button id="glassBot-send">➤</button>
-        </div>
+  <div id="chat-box">
+    <div id="chat-header">
+      <strong>Ask RPF 💬</strong>
+      <div>
+        <button onclick="openClearModal()">🗑</button>
+        <button onclick="closeChat()">✕</button>
       </div>
-
-      <button id="glassBot-btn">💬</button>
     </div>
 
-    <script>
-  const btn = document.getElementById("glassBot-btn");
-  const box = document.getElementById("glassBot-box");
-  const closeBtn = document.getElementById("glassBot-close");
-  const clearBtn = document.getElementById("glassBot-clear");
+    <div id="chat-body">
+      <div class="message bot">
+        👋 Welcome! How can I assist you today?
 
-  const tabFAQ = document.getElementById("glassTabFAQ");
-  const tabCHAT = document.getElementById("glassTabCHAT");
+        <!-- FAQs Added Here -->
+        <div class="faq">
+          <button onclick="sendFAQ('What is RPF??')">What is RPF?</button>
+          <button onclick="sendFAQ('How to apply for incubation?')">How to apply for incubation?</button>
+        </div>
+      </div>
+    </div>
 
-  const faqSection = document.getElementById("glassBot-faq");
-  const chatSection = document.getElementById("glassBot-chat");
+    <div id="chat-input">
+      <input id="chatText" placeholder="Type your question..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
 
-  const inputWrap = document.getElementById("glassBot-input");
-  const inputText = document.getElementById("glassBot-text");
-  const sendBtn = document.getElementById("glassBot-send");
-  const typing = document.getElementById("glassBot-typing");
+  <!-- Clear Modal -->
+  <div id="clear-modal">
+    <div class="modal-box">
+      <h3>Clear conversation</h3>
+      <p>All messages will be cleared. Continue?</p>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeClearModal()">Cancel</button>
+        <button class="confirm-clear" onclick="confirmClear()">Clear</button>
+      </div>
+    </div>
+  </div>
 
-  /* ================= AWS STYLE FORMATTER ================= */
+  <script>
+    const launcher = document.getElementById("chat-launcher");
+    const chatBox = document.getElementById("chat-box");
+    const chatBody = document.getElementById("chat-body");
+    const chatInput = document.getElementById("chatText");
+    const chatBadge = document.getElementById("chat-badge");
+    const closeBadge = document.getElementById("close-badge");
 
-  function formatAWS(text) {
+    // Prevent clicks inside chat box from closing it
+    chatBox.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
 
-    // Normalize bullets
-    text = text.replace(/ • /g, "\n• ");
-    text = text.replace(/\* /g, "• ");
+    /* ================= BADGE ================= */
+    closeBadge.onclick = () => {
+      event.stopPropagation(); // 🔑 prevent document click
+      chatBadge.style.display = "none";
+      closeBadge.style.display = "none";
+    };
 
-    // Extract Title (# Title)
-    text = text.replace(/^# (.*$)/gm, "<div class='aws-title'>$1</div>");
+    chatBadge.onclick = () => {
+      event.stopPropagation(); // 🔑 prevent document click
+      chatBox.style.display = "flex";
+      chatBadge.style.display = "none";
+      closeBadge.style.display = "none";
+    };
 
-    // Section headers
-    text = text.replace(/Key Points:/g, "<div class='aws-section'>Key Benefits:</div>");
-    text = text.replace(/Facilities \/ Support \/ Details:/g, "<div class='aws-section'>Facilities / Support:</div>");
+    launcher.onclick = (event) => {
+      event.stopPropagation(); // prevent document click
+      if (chatBox.style.display === "flex") {
+        chatBox.style.display = "none";
+      } else {
+        chatBox.style.display = "flex";
+      }
 
-    // Bullet formatting
-    text = text.replace(/• (.*?)(?=\n|$)/g, "<div class='aws-bullet'>• $1</div>");
+      chatBadge.style.display = "none";
+      closeBadge.style.display = "none";
+    };
 
-    // Line breaks
-    text = text.replace(/\n/g, "");
+    function closeChat(){
+      chatBox.style.display = 'none';
+    }
 
-    return text;
-  }
+    document.addEventListener("click", function (event) {
+      const isClickInsideChat = chatBox.contains(event.target);
+      const isClickOnLauncher = launcher.contains(event.target);
 
-  function typeBotMessage(text, speed = 10) {
+      if (!isClickInsideChat && !isClickOnLauncher) {
+        chatBox.style.display = "none";
+      }
+    });
 
-    const formatted = formatAWS(text);
 
-    const div = document.createElement("div");
-    div.className = "glassBot-msg glassBot-bot";
-    chatSection.appendChild(div);
+    /* ================= AWS STYLE FORMATTER ================= */
+    function formatAWS(text) {
 
-    let i = 0;
+      // Normalize bullets
+      text = text.replace(/ • /g, "\n• ");
+      text = text.replace(/\* /g, "• ");
 
-    function typingEffect() {
-      if (i < formatted.length) {
-        div.innerHTML = formatted.substring(0, i);
-        i++;
-        chatSection.scrollTop = chatSection.scrollHeight;
-        setTimeout(typingEffect, speed);
+      // Extract Title (# Title)
+      text = text.replace(/^# (.*$)/gm, "<div class='aws-title'>$1</div>");
+
+      // Section headers
+      text = text.replace(/Key Points:/g,
+        "<div class='aws-section'>Key Benefits:</div>");
+      text = text.replace(/Facilities \/ Support \/ Details:/g,
+        "<div class='aws-section'>Facilities / Support:</div>");
+
+      // Bullet formatting
+      text = text.replace(/• (.*?)(?=\n|$)/g,
+        "<div class='aws-bullet'>• $1</div>");
+
+      // Remove raw new lines
+      text = text.replace(/\n/g, "");
+
+      return text;
+    }
+
+
+    /* ================= BACKEND ================= */
+
+    async function sendToBackend(message) {
+      try {
+        const res = await fetch("http://127.0.0.1:5000/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: message }),
+        });
+        const data = await res.json();
+        return data.answer || "🤖 I couldn't find an answer.";
+      } catch {
+        return "❌ Server error. Please try again later.";
       }
     }
 
-    typingEffect();
-  }
+    /* ================= MESSAGES ================= */
 
-  /* ================= BACKEND CALL ================= */
-
-  async function sendToBackend(message) {
-    try {
-      const response = await fetch("http://127.0.0.1:5000/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: message }),
-      });
-      const data = await response.json();
-      return data.answer || "🤖 I couldn't find an answer.";
-    } catch {
-      return "❌ Server error.";
+    function addUserMessage(text) {
+      chatBody.innerHTML += `
+    <div class="message user">
+      <span>${text}</span>
+    </div>`;
+      chatBody.scrollTop = chatBody.scrollHeight;
     }
-  }
 
-  function addUserMessage(text) {
-    const div = document.createElement("div");
-    div.className = "glassBot-msg glassBot-user";
-    div.innerHTML = text;
-    chatSection.appendChild(div);
-  }
+    function showTyping() {
+      chatBody.innerHTML += `
+    <div class="message bot" id="typing">
+      <div class="typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>`;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
 
-  async function handleSend(text) {
-    if (!text.trim()) return;
+    function removeTyping() {
+      document.getElementById("typing")?.remove();
+    }
 
-    addUserMessage(text);
-    inputText.value = "";
-    typing.style.display = "block";
+    function addBotMessage(text) {
+      chatBody.innerHTML += `
+    <div class="message bot">
+      ${text}
+      <div class="feedback">
+        <i class="fa-regular fa-thumbs-up" onclick="handleFeedback(this,'good')"></i>
+        <i class="fa-regular fa-thumbs-down" onclick="handleFeedback(this,'bad')"></i>
+      </div>
+    </div>`;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
 
-    const reply = await sendToBackend(text);
+    /* ================= SEND ================= */
 
-    typing.style.display = "none";
-    typeBotMessage(reply);   // ✅ IMPORTANT
-  }
+    async function sendMessage() {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
 
-  async function clearChat() {
-    chatSection.innerHTML = "";
-    try {
-      await fetch("http://127.0.0.1:5000/reset", { method: "POST" });
-    } catch {}
-    typeBotMessage("🗑 Chat cleared! 👋 Hello! Ask me anything.");
-  }
+      addUserMessage(msg);
+      chatInput.value = "";
 
-  /* ================= UI HANDLERS ================= */
+      showTyping();
+      const reply = await sendToBackend(msg);
+      removeTyping();
+      typeBotMessage(reply);
 
-  btn.onclick = () => {
-    box.style.display = box.style.display === "block" ? "none" : "block";
-  };
+    }
 
-  closeBtn.onclick = () => (box.style.display = "none");
-  clearBtn.onclick = clearChat;
+    function sendFAQ(q) {
+      chatInput.value = q;
+      sendMessage();
+    }
 
-  tabFAQ.onclick = () => {
-    faqSection.style.display = "block";
-    chatSection.style.display = "none";
-    inputWrap.style.display = "none";
-  };
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
 
-  tabCHAT.onclick = () => {
-    faqSection.style.display = "none";
-    chatSection.style.display = "block";
-    inputWrap.style.display = "flex";
-  };
+    function typeBotMessage(text, speed = 8, good = true) {
 
-  document.querySelectorAll(".glassBot-faq-item")
-    .forEach((i) => (i.onclick = () => handleSend(i.textContent)));
+      const formatted = formatAWS(text);
 
-  sendBtn.onclick = () => handleSend(inputText.value);
+      // Create bot message wrapper
+      const botDiv = document.createElement("div");
+      botDiv.className = "message bot";
+      chatBody.appendChild(botDiv);
 
-  inputText.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") handleSend(inputText.value);
-  });
-</script>
-  </body>
+      let i = 0;
+
+      if (text == "Server error. Please try again later") {
+        good = false;
+      }
+
+      function typingEffect(good) {
+        if (i <= formatted.length) {
+          botDiv.innerHTML =
+            formatted.substring(0, i) +
+            (i === formatted.length ? feedbackHTML(good) : "");
+          chatBody.scrollTop = chatBody.scrollHeight;
+          i++;
+          setTimeout(typingEffect, speed);
+        }
+      }
+
+      typingEffect();
+    }
+
+    function feedbackHTML(good) {
+      if (good) {
+        return `
+        <div class="feedback">
+          <i class="fa-regular fa-thumbs-up"
+          onclick="handleFeedback(this,'good')"></i>
+          <i class="fa-regular fa-thumbs-down"
+          onclick="handleFeedback(this,'bad')"></i>
+          </div>`;
+      } else {
+        return ``;
+      }
+    }
+
+
+    /* ================= CLEAR CHAT ================= */
+
+    async function confirmClear() {
+      chatBody.innerHTML = "";
+      try {
+        await fetch("http://127.0.0.1:5000/reset", { method: "POST" });
+      } catch { }
+      chatBody.innerHTML = `
+    <div class="message bot">
+      👋 Chat cleared! How can I assist you?
+      <div class="faq">
+        <button onclick="sendFAQ('What is RPF?')">What is RPF?</button>
+        <button onclick="sendFAQ('How to apply for incubation?')">How to apply?</button>
+      </div>
+    </div>`;
+      closeClearModal();
+    }
+
+    /* ================= FEEDBACK ================= */
+
+    function handleFeedback(icon, type) {
+      const box = icon.parentElement;
+      if (box.classList.contains("selected")) return;
+      box.classList.add("selected");
+
+      icon.classList.add("clicked");
+      box.querySelectorAll("i").forEach(i => {
+        i.style.pointerEvents = "none";
+        i.style.opacity = "0.5";
+      });
+
+      setTimeout(() => {
+        chatBody.innerHTML += `
+      <div class="message bot">
+        ${type === "good"
+            ? "😊 Thanks for your feedback!"
+            : "🙏 Thanks! We'll improve this."}
+      </div>`;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 500);
+    }
+
+    /* ================= MODAL ================= */
+    function openClearModal() {
+      document.getElementById("clear-modal").style.display = "flex";
+    }
+    function closeClearModal() {
+      document.getElementById("clear-modal").style.display = "none";
+    }
+  </script>
+
+
+</body>
+
 </html>
