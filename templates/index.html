@@ -332,6 +332,16 @@
       margin-bottom: 6px;
       line-height: 1.5;
     }
+
+    #sendButton:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #chatText:disabled {
+      background: #f0f0f0;
+    }
+    
   </style>
 
 </head>
@@ -368,7 +378,7 @@
 
     <div id="chat-input">
       <input id="chatText" placeholder="Type your question..." />
-      <button onclick="sendMessage()">Send</button>
+      <button id="sendButton" onclick="sendMessage()">Send</button>
     </div>
   </div>
 
@@ -423,7 +433,7 @@
       closeBadge.style.display = "none";
     };
 
-    function closeChat(){
+    function closeChat() {
       chatBox.style.display = 'none';
     }
 
@@ -550,6 +560,13 @@
       botDiv.className = "message bot";
       chatBody.appendChild(botDiv);
 
+      const input = document.getElementById("chatText");
+      const sendBtn = document.getElementById("sendButton");
+
+      // Disable input + button at start
+      input.disabled = true;
+      sendBtn.disabled = true;
+
       let i = 0;
 
       if (text == "Server error. Please try again later") {
@@ -561,14 +578,29 @@
           botDiv.innerHTML =
             formatted.substring(0, i) +
             (i === formatted.length ? feedbackHTML(good) : "");
-          chatBody.scrollTop = chatBody.scrollHeight;
+          // chatBody.scrollTop = chatBody.scrollHeight;
           i++;
           setTimeout(typingEffect, speed);
+        } else {
+          enableInput();
         }
       }
 
       typingEffect();
     }
+
+
+
+    function enableInput() {
+      const input = document.getElementById("chatText");
+      const sendBtn = document.getElementById("sendButton");
+
+      input.disabled = false;
+      sendBtn.disabled = false;
+
+      input.focus();
+    }
+
 
     function feedbackHTML(good) {
       if (good) {
