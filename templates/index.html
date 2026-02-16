@@ -8,6 +8,13 @@
   <title>SPPU Assistant - Ask RPF</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
@@ -22,7 +29,7 @@
     }
 
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Rubik', sans-serif;
       background: #000000;
       margin: 0;
     }
@@ -65,7 +72,7 @@
     #chat-badge {
       position: fixed;
       display: flex;
-      bottom: 95px;
+      bottom: 94px;
       right: 44px;
       width: 191px;
       background: #fff;
@@ -77,12 +84,13 @@
       max-width: 226px;
       cursor: pointer;
       z-index: 999;
+      height: 16px;
     }
 
     #close-badge {
       position: fixed;
       display: flex;
-      bottom: 95px;
+      bottom: 94px;
       right: 20px;
       background: #fff;
       padding: 10px 14px;
@@ -94,16 +102,7 @@
       cursor: pointer;
       z-index: 1000;
       width: 19px;
-    }
-
-    @media (max-width: 600px) {
-      #chat-box {
-        width: 65%;
-        height: 60%;
-        bottom: 92px;
-        right: 19px;
-        border-radius: 100;
-      }
+      height: 16px;
     }
 
 
@@ -341,7 +340,154 @@
     #chatText:disabled {
       background: #f0f0f0;
     }
-    
+
+    .message.bot {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+
+    .message.user span {
+      font-family: 'Rubik', sans-serif;
+      font-size: 14px;
+    }
+
+    #chat-header strong {
+      font-family: 'Poppins', sans-serif;
+      font-size: large;
+    }
+
+    #header-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 20%;
+      object-fit: cover;
+      background: #fff;
+      padding: 2px;
+    }
+
+
+    @media (max-width: 480px) {
+
+      #chat-launcher {
+        width: 52px;
+        height: 52px;
+        bottom: 15px;
+        right: 15px;
+        font-size: 20px;
+      }
+
+      #chat-box {
+        width: 94vw;
+        height: 70vh;
+        right: 3vw;
+        bottom: 80px;
+        border-radius: 16px;
+      }
+
+      #chat-header {
+        padding: 12px;
+      }
+
+      #chat-header strong {
+        font-size: 14px;
+      }
+
+      #header-img {
+        width: 36px;
+        height: 36px;
+      }
+
+      #chat-body {
+        padding: 12px;
+      }
+
+      .message {
+        font-size: 13px;
+      }
+
+      #chat-input {
+        padding: 10px;
+      }
+
+      #chat-input input {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      #chat-input button {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+
+      #chat-badge {
+        width: auto;
+        max-width: 75vw;
+        right: 70px;
+        bottom: 85px;
+        font-size: 12px;
+      }
+
+      #close-badge {
+        right: 15px;
+        bottom: 85px;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+
+      #chat-box {
+        width: 75vw;
+        height: 72vh;
+        right: 12px;
+        bottom: 90px;
+      }
+
+      #chat-launcher {
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+      }
+
+      #chat-body {
+        padding: 14px;
+      }
+
+      .message {
+        font-size: 14px;
+      }
+
+      #chat-input input {
+        font-size: 15px;
+      }
+
+      #chat-badge {
+        max-width: 60vw;
+        right: 80px;
+      }
+    }
+
+    @media (max-width: 375px) {
+
+      #chat-box {
+        height: 65vh;
+      }
+
+      #chat-header strong {
+        font-size: 13px;
+      }
+
+      .message {
+        font-size: 12.5px;
+      }
+
+      #chat-input input {
+        font-size: 13px;
+      }
+
+      #chat-input button {
+        font-size: 13px;
+      }
+    }
   </style>
 
 </head>
@@ -357,7 +503,11 @@
 
   <div id="chat-box">
     <div id="chat-header">
-      <strong>Ask RPF 💬</strong>
+      <!-- <img id="header-img" src="./rsz_1research_park_logo_-_transperent_png.png" alt=""> -->
+      <strong>
+        Ask RPF 💭
+      </strong>
+
       <div>
         <button onclick="openClearModal()">🗑</button>
         <button onclick="closeChat()">✕</button>
