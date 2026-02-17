@@ -111,12 +111,11 @@ def initialize_gemini():
                     "Title\n"
                     "Short description (1–2 lines)\n\n"
                     "Key Points:\n"
-                    "• Bullet point\n"
-                    "• Bullet point\n\n"
+                    "•Bullet point\n"
+                    "•Bullet point\n\n"
                     "Facilities / Support / Details (if applicable):\n"
-                    "• Bullet point\n"
-                    "• Bullet point\n\n"
-                    "Source: [Verified from the uploaded document]"
+                    "•Bullet point\n"
+                    "•Bullet point\n\n"
                 )
             )
         )

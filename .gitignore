@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 __pycache__
+=======
+__pycache__
+.env
+db.py
+SPPU_RPF_Qs&As.pdf
+>>>>>>> atharva
