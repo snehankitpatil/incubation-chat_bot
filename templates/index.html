@@ -503,9 +503,10 @@
 
   <div id="chat-box">
     <div id="chat-header">
-      <!-- <img id="header-img" src="./rsz_1research_park_logo_-_transperent_png.png" alt=""> -->
+      <!-- <img id="header-img" src="./wall-e-icons-set-2-eve512-1-eve-from-wall-e-png-clipart.jpg" alt=""> -->
       <strong>
-        Ask RPF 💭
+        Ask RPF
+        <i class="fa-solid fa-robot"></i>
       </strong>
 
       <div>
@@ -558,13 +559,13 @@
     });
 
     /* ================= BADGE ================= */
-    closeBadge.onclick = () => {
+    closeBadge.onclick = (event) => {
       event.stopPropagation(); // 🔑 prevent document click
       chatBadge.style.display = "none";
       closeBadge.style.display = "none";
     };
 
-    chatBadge.onclick = () => {
+    chatBadge.onclick = (event) => {
       event.stopPropagation(); // 🔑 prevent document click
       chatBox.style.display = "flex";
       chatBadge.style.display = "none";
@@ -753,17 +754,13 @@
 
 
     function feedbackHTML(good) {
-      if (good) {
-        return `
-        <div class="feedback">
-          <i class="fa-regular fa-thumbs-up"
-          onclick="handleFeedback(this,'good')"></i>
-          <i class="fa-regular fa-thumbs-down"
-          onclick="handleFeedback(this,'bad')"></i>
-          </div>`;
-      } else {
-        return ``;
-      }
+      if (!good) return "";
+
+      return `
+    <div class="feedback">
+      <i class="fa-regular fa-thumbs-up" data-type="good" onclick="handleFeedback(this, 'good')></i>
+      <i class="fa-regular fa-thumbs-down" data-type="bad" onclick="handleFeedback(this, 'bad')></i>
+    </div>`;
     }
 
 
@@ -815,6 +812,45 @@
     }
     function closeClearModal() {
       document.getElementById("clear-modal").style.display = "none";
+    }
+
+    // Persistent session ID
+    let sessionId = localStorage.getItem("chat_session_id");
+
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("chat_session_id", sessionId);
+    }
+
+    async function loadHistoryFromServer() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/history/${sessionId}");
+
+        const data = await response.json();
+
+        chatSection.innerHTML = "";
+
+        data.forEach(item => {
+
+          // Add user message
+          const userDiv = document.createElement("div");
+          userDiv.className = "glassBot-msg glassBot-user";
+          userDiv.innerHTML = item.question;
+          chatSection.appendChild(userDiv);
+
+          // Add bot message WITHOUT typing animation
+          const botDiv = document.createElement("div");
+          botDiv.className = "glassBot-msg glassBot-bot";
+          botDiv.innerHTML = formatAWS(item.answer);
+          chatSection.appendChild(botDiv);
+
+        });
+
+        chatSection.scrollTop = chatSection.scrollHeight;
+
+      } catch (error) {
+        console.error("Error loading history:", error);
+      }
     }
   </script>
 
