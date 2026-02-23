@@ -54,7 +54,7 @@ _store = None
 _chat = None
 
 def initialize_gemini():
-    """Initialize Gemini store and chat (lazy loading)"""
+    "Initialize Gemini store and chat (lazy loading)"
     global _store, _chat
     
     if _chat is not None:
@@ -97,10 +97,22 @@ def initialize_gemini():
                     "Answer strictly and only from the provided document.\n"
                     "Do NOT add external knowledge.\n"
                     "Do NOT merge multiple questions.\n"
-                    "Answer ONLY the first question if multiple are asked.\n\n"
+                    "Do NOT use Markdown symbols such as #, ##, **, *, or numbered lists..\n"
+                    "Answer ONLY the first question if multiple are asked.\n"
+                    "Never sound rejecting or abrupt. \n"
+                    "Reassure without adding new facts. \n"
+                    "Use professional incubation-center empathy. \n\n"
+                    
+                    "BEFOR TITLE: \n"
+                    "Acknowledge user intent politely. \n"
+                    "ONE empathy line. \n"
+                    "1 sentence. \n"
+                    "Neutral. \n"
+                    "No emotional words like sad, sorry, upset. \n"
 
                     "VERY IMPORTANT FORMATTING RULES (FOLLOW STRICTLY):\n"
-                    "- Use a CLEAR TITLE as the first line.\n"
+                    "- Use a BEFORE TITLE use ONE empathy line as the first line.\n"
+                    "- Use a CLEAR TITLE as the second line below the empathy line.\n"
                     "- Give a ONE-LINE definition below the title.\n"
                     "- Then provide sections with bullet points.\n"
                     "- Use short, crisp bullets (AWS documentation style).\n"
@@ -108,6 +120,7 @@ def initialize_gemini():
                     "- Each bullet must contain only ONE idea.\n\n"
 
                     "MANDATORY ANSWER STRUCTURE:\n"
+                    "Empathy line \n\n"
                     "Title\n"
                     "Short description (1–2 lines)\n\n"
                     "Key Points:\n"
@@ -285,11 +298,8 @@ def ask_bot(question: str, session_id: str) -> str:
         # 5️⃣ Build prompt with context
         if conversation_context:
             contextualized_question = f"""Previous conversation:
-{conversation_context}
-
-Current question: {question}
-
-Answer the current question considering the conversation history."""
+                    {conversation_context}Current question: {question}
+                    Answer the current question considering the conversation history."""
         else:
             contextualized_question = question
 
@@ -344,7 +354,7 @@ Answer the current question considering the conversation history."""
         
         # Specific error messages
         if "ConnectError" in error_msg or "nodename" in error_msg:
-            return "❌ Cannot connect to Gemini API. Please check your internet connection and try again."
+            return "❌ I&#39;m unable to fetch the response right now due to a connection issue. Please try again in a moment/Please check your internet connection and try again."
         elif "API key" in error_msg:
             return "❌ Invalid API key. Please check your GEMINI_API_KEY in the .env file."
         else:
@@ -385,18 +395,17 @@ Regards,
     encoded_subject = urllib.parse.quote(subject)
     encoded_body = urllib.parse.quote(body)
 
-    mailto_link = f"mailto:rajashree.rpf@gmail.com?subject={encoded_subject}&body={encoded_body}"
+    mailto_link = f"mailto:info.sppurpf@gmail.com?subject={encoded_subject}&body={encoded_body}"
 
     return f"""
-⚠️ This query requires expert assistance.<br><br>
+⚠️ That&#39;s a valid query, and it&#39;s not covered in the current RPF reference document.<br>
+<b>Important</b>To ensure you get accurate guidance, this needs expert input. <br><br>
 
-You can directly contact our support team:<br><br>
+You can directly contact to our support team:<br><br>
 
 📧 <a href="{mailto_link}" style="color:#4da6ff; font-weight:bold;">
-rajashree.rpf@gmail.com
+info.sppurpf@gmail.com
 </a><br><br>
-
-📞 Contact No: <b>+91 98765 43210</b>
 """
 
 

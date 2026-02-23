@@ -488,6 +488,47 @@
         font-size: 13px;
       }
     }
+
+    /* ================= SCROLL TO BOTTOM BUTTON ================= */
+    #scroll-bottom-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 70px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      z-index: 10;
+    }
+
+    #scroll-bottom-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Mobile adjustment */
+    @media (max-width: 480px) {
+      #scroll-bottom-btn {
+        bottom: 75px;
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+      }
+    }
+
+    .aws-empathy {
+      font-size: 13px;
+      color: #000000;
+      margin-bottom: 6px;
+      font-style: normal;
+    }
   </style>
 
 </head>
@@ -531,6 +572,8 @@
       <input id="chatText" placeholder="Type your question..." />
       <button id="sendButton" onclick="sendMessage()">Send</button>
     </div>
+
+    <button id="scroll-bottom-btn"><i class="fa-solid fa-arrow-down"></i></button>
   </div>
 
   <!-- Clear Modal -->
@@ -601,29 +644,60 @@
     /* ================= AWS STYLE FORMATTER ================= */
     function formatAWS(text) {
 
-      // Normalize bullets
-      text = text.replace(/ • /g, "\n• ");
-      text = text.replace(/\* /g, "• ");
+      /* ================= REMOVE MARKDOWN ================= */
 
-      // Extract Title (# Title)
-      text = text.replace(/^# (.*$)/gm, "<div class='aws-title'>$1</div>");
+      // Remove markdown headings (##, ###, etc.)
+      text = text.replace(/^#{1,6}\s*/gm, "");
+
+      // Remove bold markers (**text**)
+      text = text.replace(/\*\*(.*?)\*\*/g, "$1");
+
+      // Remove italic markers (*text*)
+      text = text.replace(/\*(.*?)\*/g, "$1");
+
+      /* ================= SPLIT EMPATHY ================= */
+
+      const lines = text.split("\n").filter(l => l.trim() !== "");
+
+      const empathyLine = lines.shift();
+      let remainingText = lines.join("\n");
+
+      /* ================= AWS FORMAT ================= */
+
+      remainingText = remainingText.replace(/ • /g, "\n• ");
+      remainingText = remainingText.replace(/\* /g, "• ");
+
+      // Title = first line after empathy
+      remainingText = remainingText.replace(
+        /^(.*$)/m,
+        "<div class='aws-title'>$1</div>"
+      );
 
       // Section headers
-      text = text.replace(/Key Points:/g,
-        "<div class='aws-section'>Key Benefits:</div>");
-      text = text.replace(/Facilities \/ Support \/ Details:/g,
-        "<div class='aws-section'>Facilities / Support:</div>");
+      remainingText = remainingText.replace(
+        /Key Points:/g,
+        "<div class='aws-section'>Key Benefits:</div>"
+      );
 
-      // Bullet formatting
-      text = text.replace(/• (.*?)(?=\n|$)/g,
-        "<div class='aws-bullet'>• $1</div>");
+      remainingText = remainingText.replace(
+        /Facilities \/ Support \/ Details:/g,
+        "<div class='aws-section'>Facilities / Support:</div>"
+      );
 
-      // Remove raw new lines
-      text = text.replace(/\n/g, "");
+      // Bullets
+      remainingText = remainingText.replace(
+        /• (.*?)(?=\n|$)/g,
+        "<div class='aws-bullet'>• $1</div>"
+      );
 
-      return text;
+      // Remove leftover newlines
+      remainingText = remainingText.replace(/\n/g, "");
+
+      return `
+    <div class="aws-empathy">${empathyLine}</div>
+    ${remainingText}
+  `;
     }
-
 
     /* ================= BACKEND ================= */
 
@@ -852,6 +926,31 @@
         console.error("Error loading history:", error);
       }
     }
+
+    const scrollBtn = document.getElementById("scroll-bottom-btn");
+
+    /* Show button when user scrolls DOWN */
+    chatBody.addEventListener("scroll", () => {
+
+      if (chatBody.scrollTop > 40) {
+        // user scrolled down a bit
+        scrollBtn.style.display = "flex";
+      } else {
+        // near the top
+        scrollBtn.style.display = "none";
+      }
+    });
+
+    /* Scroll to bottom on click */
+    scrollBtn.addEventListener("click", () => {
+      chatBody.scrollTo({
+        top: chatBody.scrollHeight,
+        behavior: "smooth"
+      });
+
+      // hide button after jumping down
+      scrollBtn.style.display = "none";
+    });
   </script>
 
 
