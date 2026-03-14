@@ -1,83 +1,83 @@
 import os
 import logging
+from pathlib import Path
+
+import certifi
+from dotenv import load_dotenv
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
+# ── Logging ──────────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────
-# READ URI FROM ENVIRONMENT
-# Local  → MONGO_URI=mongodb://localhost:27017
-# Atlas  → MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
-# ─────────────────────────────────────────────
+# ── Load .env ─────────────────────────────────────────────────
+_env_path = Path(__file__).parent / ".env"
+load_dotenv(_env_path)
+
+logger.info(f"[db.py] .env path: {_env_path}")
+logger.info(f"[db.py] .env exists: {_env_path.exists()}")
+
+# ── Read Mongo URI ───────────────────────────────────────────
 MONGO_URI = os.getenv("MONGO_URI")
 
 if not MONGO_URI:
-    raise RuntimeError(
-        "MONGO_URI environment variable is not set.\n"
-        "  Local  : MONGO_URI=mongodb://localhost:27017\n"
-        "  Atlas  : MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
-    )
+    raise RuntimeError("MONGO_URI not found in .env file")
 
-# ─────────────────────────────────────────────
-# CONNECTION
-# ─────────────────────────────────────────────
+logger.info(f"[db.py] MONGO_URI loaded: {repr(MONGO_URI)}")
+
+# ── Connect to MongoDB ───────────────────────────────────────
 try:
     client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=8000,   # wait up to 8s for Atlas cold-start
-        connectTimeoutMS=8000,
-        socketTimeoutMS=30000,
-        tls=True if "mongodb+srv" in MONGO_URI else False,
-        retryWrites=True,
-    )
-    # Verify connection immediately at startup
+    MONGO_URI,
+    tls=True,
+    tlsAllowInvalidCertificates=False,
+    tlsCAFile=certifi.where(),
+    serverSelectionTimeoutMS=20000
+)
+
     client.admin.command("ping")
     logger.info("✅ MongoDB connected successfully.")
 
 except (ConnectionFailure, ServerSelectionTimeoutError) as e:
     logger.error(f"❌ MongoDB connection failed: {e}")
     raise RuntimeError(
-        "Cannot connect to MongoDB.\n"
-        "Check your MONGO_URI in the .env file and ensure the cluster is reachable."
+        f"Cannot connect to MongoDB at: {MONGO_URI}\n"
+        "Check your MONGO_URI in the .env file."
     )
 
-# ─────────────────────────────────────────────
-# DATABASE + COLLECTIONS
-# ─────────────────────────────────────────────
+# ── Database + Collections ───────────────────────────────────
 DB_NAME = os.getenv("MONGO_DB_NAME", "startup_support_bot")
+
 db = client[DB_NAME]
 
-knowledge_collection  = db["knowledge_sources"]
-chat_collection       = db["chat_history"]
-user_collection       = db["users"]
+knowledge_collection = db["knowledge_sources"]
+chat_collection = db["chat_history"]
+user_collection = db["users"]
 escalation_collection = db["escalations"]
 
-# ─────────────────────────────────────────────
-# INDEXES  (idempotent — safe to run repeatedly)
-# ─────────────────────────────────────────────
+# ── Indexes ──────────────────────────────────────────────────
 try:
-    # chat_history: session lookup + chronological sort
     chat_collection.create_index(
         [("session_id", ASCENDING), ("timestamp", ASCENDING)],
         background=True,
-        name="idx_chat_session_time"
+        name="idx_chat_session_time",
     )
-    # users: fast single-session lookup, enforce uniqueness
+
     user_collection.create_index(
         [("session_id", ASCENDING)],
         unique=True,
         background=True,
-        name="idx_user_session"
+        name="idx_user_session",
     )
-    # escalations: admin dashboard — filter by status + date
+
     escalation_collection.create_index(
         [("status", ASCENDING), ("created_at", ASCENDING)],
         background=True,
-        name="idx_escalation_status"
+        name="idx_escalation_status",
     )
+
     logger.info("✅ MongoDB indexes verified.")
 
 except Exception as e:
-    # Non-fatal — app still works without indexes
-    logger.warning(f"⚠️  Index creation warning: {e}")
+    logger.warning(f"⚠️ Index creation warning: {e}")

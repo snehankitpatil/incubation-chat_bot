@@ -166,8 +166,5 @@ if __name__ == "__main__":
         f"Starting Flask on port {port} "
         f"({'production' if IS_PRODUCTION else 'development'} mode)"
     )
-    app.run(
-        host="0.0.0.0",
-        port=port,
-        debug=not IS_PRODUCTION   # NEVER run debug=True in production
+    app.run(host="0.0.0.0", port=5001, debug=True, use_reloader=False
     )
