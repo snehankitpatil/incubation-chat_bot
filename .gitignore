@@ -1,8 +1,21 @@
-<<<<<<< HEAD
-__pycache__
-=======
-__pycache__
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+
+# Secrets
 .env
-db.py
+
+# OS
+.DS_Store
+
+# Generated
+__pycache__/
+
+# Data
 SPPU_RPF_Qs&As.pdf
->>>>>>> atharva
