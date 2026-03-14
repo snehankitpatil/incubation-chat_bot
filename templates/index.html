@@ -592,6 +592,9 @@
   </div>
 
   <script>
+    // Configure the backend URL here
+    const BACKEND_URL = 'https://your-vercel-app.vercel.app'; // Replace with your Vercel deployment URL
+
     const launcher = document.getElementById("chat-launcher");
     const chatBox = document.getElementById("chat-box");
     const chatBody = document.getElementById("chat-body");
@@ -706,7 +709,7 @@
 
     async function sendToBackend(message) {
       try {
-        const res = await fetch("/ask", {
+        const res = await fetch(`${BACKEND_URL}/ask`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: message }),
@@ -848,7 +851,7 @@
     async function confirmClear() {
       chatBody.innerHTML = "";
       try {
-        await fetch("http://127.0.0.1:5000/reset", { method: "POST" });
+        await fetch(`${BACKEND_URL}/reset`, { method: "POST" });
       } catch { }
       chatBody.innerHTML = `
     <div class="message bot">

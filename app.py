@@ -2,6 +2,7 @@ import os
 import uuid
 import logging
 from flask import Flask, render_template, request, jsonify, session
+from flask_cors import CORS
 from chatbot_core import ask_bot
 from db import chat_collection
 
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 # APP CONFIG
 # ─────────────────────────────────────────────
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # ✅ Production: read secret key from environment variable
 # Never hardcode secrets in production code
