@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPPU Assistant - Ask RPF</title>
+  <title>SPPU Assistant – Ask RPF</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -18,6 +18,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
+    /* ═══════════════════════════════════════════
+       CSS VARIABLES
+    ═══════════════════════════════════════════ */
     :root {
       --primary: #3A8DAD;
       --primary-dark: #1F5F73;
@@ -577,7 +580,7 @@
   </div>
 
   <!-- Clear Modal -->
-  <div id="clear-modal">
+  <div id="clear-modal" role="dialog" aria-modal="true">
     <div class="modal-box">
       <h3>Clear conversation</h3>
       <p>All messages will be cleared. Continue?</p>
@@ -703,15 +706,17 @@
 
     async function sendToBackend(message) {
       try {
-        const res = await fetch("http://127.0.0.1:5000/ask", {
+        const res = await fetch("/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: message }),
         });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        return data.answer || "🤖 I couldn't find an answer.";
-      } catch {
-        return "❌ Server error. Please try again later.";
+        return data.answer || "I couldn't find an answer. Please try again.";
+      } catch (err) {
+        console.error("Backend error:", err);
+        return "Server error. Please try again in a moment.";
       }
     }
 
